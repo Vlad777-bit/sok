@@ -1,4 +1,4 @@
-const KEY = "sok_token";
+const KEY = "dev_secret_change_me";
 
 export const auth = {
   getToken() {

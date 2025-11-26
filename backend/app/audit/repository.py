@@ -1,3 +1,5 @@
+from psycopg2.extras import Json
+
 from app.db.conn import get_conn
 
 
@@ -17,7 +19,7 @@ class AuditRepository:
           actor_user_id, actor_username, actor_role,
           action, entity, entity_id, meta
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb);
+        VALUES (%s, %s, %s, %s, %s, %s, %s);
         """
 
         actor_user_id = actor["id"] if actor else None
@@ -35,7 +37,7 @@ class AuditRepository:
                         action,
                         entity,
                         entity_id,
-                        meta,
+                        Json(meta),
                     ),
                 )
 
