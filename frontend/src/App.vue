@@ -2,7 +2,7 @@
 	<div class="container">
 		<header class="header">
 			<div>
-				<h1>СОК — MVP</h1>
+				<h1>СОК (Система обработки кредитных заявок)</h1>
 				<p class="muted">Клиент → Заявка → Решение</p>
 			</div>
 
