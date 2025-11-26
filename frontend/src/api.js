@@ -25,9 +25,14 @@ async function request(path, options = {}) {
 	const data = text ? JSON.parse(text) : null;
 
 	if (!res.ok) {
+		if (data?.errors && Array.isArray(data.errors)) {
+			const lines = data.errors.map((e) => `${e.field}: ${e.message}`);
+			throw new Error(lines.join('; '));
+		}
 		const msg = data?.detail || `HTTP ${res.status}`;
 		throw new Error(msg);
 	}
+
 	return data;
 }
 
