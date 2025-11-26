@@ -93,4 +93,8 @@ export const api = {
 		if (status) qs.set('status', status);
 		return request(`/applications?${qs.toString()}`, { method: 'GET' });
 	},
+
+	listAudit(limit = 50) {
+		return request(`/audit?limit=${limit}`, { method: 'GET' });
+	},
 };

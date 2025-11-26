@@ -27,3 +27,8 @@ def require_employee(user: dict = Depends(get_current_user)) -> dict:
     if user["role"] not in ("EMPLOYEE", "ADMIN"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return user
+
+def require_admin(user: dict = Depends(get_current_user)) -> dict:
+    if user["role"] != "ADMIN":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
+    return user

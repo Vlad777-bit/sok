@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import ping, health, clients, applications, auth
+from app.api import ping, health, clients, applications, auth, audit
 from app.auth.seed import seed_admin
 from app.core.config import settings
 from app.core.errors import validation_errors_to_list
@@ -67,3 +67,4 @@ app.include_router(health.router, prefix="/api")
 app.include_router(clients.router, prefix="/api")
 app.include_router(applications.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(audit.router, prefix="/api")

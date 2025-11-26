@@ -18,6 +18,13 @@
 			</label>
 
 			<button @click="loadAll">Обновить</button>
+			<button
+				v-if="me && me.role === 'ADMIN'"
+				class="btn-secondary"
+				@click="loadAudit"
+			>
+				Показать аудит
+			</button>
 			<button class="btn-secondary" @click="logout">Выйти</button>
 		</div>
 
@@ -76,6 +83,9 @@ const apps = ref([]);
 const clients = ref([]);
 const error = ref('');
 
+const auditRows = ref([]);
+const showAudit = ref(false);
+
 const statusFilter = ref(''); // "" = ALL
 
 async function loadAll() {
@@ -92,6 +102,16 @@ async function loadAll() {
 function logout() {
 	auth.clear();
 	router.push('/employee/login');
+}
+
+async function loadAudit() {
+	error.value = '';
+	try {
+		auditRows.value = await api.listAudit(50);
+		showAudit.value = true;
+	} catch (e) {
+		error.value = e.message || 'Ошибка аудита';
+	}
 }
 
 watch(statusFilter, () => {
