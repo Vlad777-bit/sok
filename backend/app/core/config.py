@@ -12,9 +12,15 @@ class Settings:
     db_user: str = os.getenv("DB_USER", "sok_user")
     db_password: str = os.getenv("DB_PASSWORD", "sok_pass")
 
+    cors_origins_raw: str = os.getenv("CORS_ORIGINS", "http://localhost:5173")
+
+    @property
+    def cors_origins(self) -> list[str]:
+        # "http://a, http://b" -> ["http://a","http://b"]
+        return [x.strip() for x in self.cors_origins_raw.split(",") if x.strip()]
+
     @property
     def db_dsn(self) -> str:
-        # psycopg2 DSN
         return (
             f"host={self.db_host} port={self.db_port} dbname={self.db_name} "
             f"user={self.db_user} password={self.db_password}"
