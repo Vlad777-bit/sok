@@ -42,5 +42,5 @@ class ApplicationService:
     def get_application(self, app_id: int) -> dict | None:
         return self.repo.get_by_id(app_id)
 
-    def list_applications(self, limit: int, offset: int) -> list[dict]:
-        return self.repo.list(limit=limit, offset=offset)
+    def list_applications(self, limit: int, offset: int, status: str | None) -> list[dict]:
+        return self.repo.list(limit=limit, offset=offset, status=status)

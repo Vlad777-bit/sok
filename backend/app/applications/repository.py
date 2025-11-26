@@ -25,11 +25,18 @@ class ApplicationRepository:
                 cur.execute("SELECT * FROM credit_applications WHERE id = %s;", (app_id,))
                 return cur.fetchone()
 
-    def list(self, limit: int, offset: int) -> list[dict]:
+    def list(self, limit: int, offset: int, status: str | None) -> list[dict]:
+        sql = "SELECT * FROM credit_applications"
+        params: list[object] = []
+
+        if status:
+            sql += " WHERE status = %s"
+            params.append(status)
+
+        sql += " ORDER BY id DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+
         with get_conn() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT * FROM credit_applications ORDER BY id DESC LIMIT %s OFFSET %s;",
-                    (limit, offset),
-                )
+                cur.execute(sql, tuple(params))
                 return cur.fetchall()

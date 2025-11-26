@@ -85,9 +85,12 @@ export const api = {
 			method: 'GET',
 		});
 	},
-	listApplications(limit = 20, offset = 0) {
-		return request(`/applications?limit=${limit}&offset=${offset}`, {
-			method: 'GET',
+	listApplications(limit = 20, offset = 0, status = '') {
+		const qs = new URLSearchParams({
+			limit: String(limit),
+			offset: String(offset),
 		});
+		if (status) qs.set('status', status);
+		return request(`/applications?${qs.toString()}`, { method: 'GET' });
 	},
 };

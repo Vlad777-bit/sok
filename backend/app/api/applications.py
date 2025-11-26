@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 
 from app.auth.deps import require_employee
-from app.applications.models import ApplicationCreateRequest, ApplicationResponse
+from app.applications.models import ApplicationCreateRequest, ApplicationResponse, ApplicationStatus
 from app.applications.repository import ApplicationRepository
 from app.applications.service import ApplicationService
 from app.clients.repository import ClientRepository
@@ -31,5 +31,9 @@ def get_application(app_id: int):
 
 
 @router.get("", response_model=list[ApplicationResponse], dependencies=[Depends(require_employee)])
-def list_applications(limit: int = 20, offset: int = 0):
-    return service.list_applications(limit=limit, offset=offset)
+def list_applications(
+    limit: int = 20,
+    offset: int = 0,
+    status: ApplicationStatus | None = None,
+):
+    return service.list_applications(limit=limit, offset=offset, status=status.value if status else None)
