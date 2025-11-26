@@ -20,3 +20,15 @@ class UserRepository:
                     (username, password_hash, role),
                 )
                 return cur.fetchone()
+
+    def update_password(self, username: str, password_hash: str, role: str) -> None:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                    SET password_hash = %s, role = %s
+                    WHERE username = %s;
+                    """,
+                    (password_hash, role, username),
+                )
