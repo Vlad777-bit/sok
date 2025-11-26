@@ -20,7 +20,20 @@ audit = AuditService(AuditRepository())
 def create_application(body: ApplicationCreateRequest):
     try:
         row = service.create_application(body.model_dump())
-        audit.log(action="APPLICATION_CREATE", entity="application", entity_id=row["id"], actor=None)
+
+        audit.log(
+            action="APPLICATION_CREATE",
+            entity="application",
+            entity_id=row["id"],
+            actor=None,
+            meta={
+                "source": "public_webui",
+                "requested_amount": float(row["requested_amount"]),
+                "term_months": int(row["term_months"]),
+                "status": row["status"],
+                "interest_rate": float(row["interest_rate"]) if row["interest_rate"] is not None else None,
+            },
+        )
         return row
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -18,6 +18,7 @@
 			</label>
 
 			<button @click="loadAll">Обновить</button>
+
 			<button
 				v-if="me && me.role === 'ADMIN'"
 				class="btn-secondary"
@@ -25,6 +26,7 @@
 			>
 				Показать аудит
 			</button>
+
 			<button class="btn-secondary" @click="logout">Выйти</button>
 		</div>
 
@@ -67,6 +69,33 @@
 				<div class="muted">Доход: {{ c.monthly_income }}</div>
 			</div>
 		</section>
+
+		<!-- AUDIT -->
+		<section v-if="showAudit" class="block">
+			<h3>Аудит (последние 50)</h3>
+			<div v-if="auditRows.length === 0" class="muted">Пусто</div>
+
+			<div v-for="r in auditRows" :key="r.id" class="item">
+				<div class="row2">
+					<div>
+						<b>#{{ r.id }}</b>
+						{{ r.action }} ({{ r.entity }} {{ r.entity_id ?? '-' }})
+					</div>
+					<div class="muted">{{ formatDate(r.created_at) }}</div>
+				</div>
+				<div class="muted">
+					actor: {{ r.actor_username ?? 'public' }} ({{
+						r.actor_role ?? '-'
+					}})
+				</div>
+
+				<!-- meta может быть объектом или строкой — покажем аккуратно -->
+				<div class="muted" v-if="r.meta">
+					meta:
+					<pre class="meta">{{ prettyMeta(r.meta) }}</pre>
+				</div>
+			</div>
+		</section>
 	</div>
 </template>
 
@@ -83,10 +112,31 @@ const apps = ref([]);
 const clients = ref([]);
 const error = ref('');
 
+const statusFilter = ref(''); // "" = ALL
+
 const auditRows = ref([]);
 const showAudit = ref(false);
 
-const statusFilter = ref(''); // "" = ALL
+function formatDate(value) {
+	// value приходит как ISO строка – оставим простую “студенческую” обработку
+	try {
+		return new Date(value).toLocaleString();
+	} catch {
+		return String(value);
+	}
+}
+
+function prettyMeta(meta) {
+	try {
+		// если meta уже объект - красиво форматируем
+		if (typeof meta === 'object') return JSON.stringify(meta, null, 2);
+		// если строка - попробуем распарсить
+		const maybeObj = JSON.parse(String(meta));
+		return JSON.stringify(maybeObj, null, 2);
+	} catch {
+		return String(meta);
+	}
+}
 
 async function loadAll() {
 	error.value = '';
@@ -99,23 +149,23 @@ async function loadAll() {
 	}
 }
 
+async function loadAudit() {
+	error.value = '';
+	showAudit.value = true; // важно: чтобы блок появился даже если auditRows пустой
+	try {
+		auditRows.value = await api.listAudit(50);
+	} catch (e) {
+		error.value = e.message || 'Ошибка аудита';
+		auditRows.value = [];
+	}
+}
+
 function logout() {
 	auth.clear();
 	router.push('/employee/login');
 }
 
-async function loadAudit() {
-	error.value = '';
-	try {
-		auditRows.value = await api.listAudit(50);
-		showAudit.value = true;
-	} catch (e) {
-		error.value = e.message || 'Ошибка аудита';
-	}
-}
-
 watch(statusFilter, () => {
-	// фильтр меняется — перезагружаем список с query-параметром
 	loadAll();
 });
 
@@ -163,5 +213,14 @@ select {
 }
 .status {
 	font-weight: 700;
+}
+.meta {
+	margin: 8px 0 0;
+	background: #0b1220;
+	color: #e5e7eb;
+	padding: 10px;
+	border-radius: 12px;
+	overflow: auto;
+	font-size: 12px;
 }
 </style>

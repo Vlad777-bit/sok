@@ -17,7 +17,15 @@ audit = AuditService(AuditRepository())
 def create_client(body: ClientCreateRequest):
     try:
         row = service.create_client(body.model_dump())
-        audit.log(action="CLIENT_CREATE", entity="client", entity_id=row["id"], actor=None)
+
+        # В meta кладём только “техническое/безопасное” (без паспорта/телефона/email).
+        audit.log(
+            action="CLIENT_CREATE",
+            entity="client",
+            entity_id=row["id"],
+            actor=None,
+            meta={"source": "public_webui"}
+        )
         return row
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
