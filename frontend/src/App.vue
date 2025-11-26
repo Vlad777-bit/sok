@@ -10,6 +10,7 @@
 				<RouterLink to="/client">Клиент</RouterLink>
 				<RouterLink to="/application">Заявка</RouterLink>
 				<RouterLink to="/status">Статус</RouterLink>
+				<RouterLink to="/employee">Сотрудник</RouterLink>
 			</nav>
 		</header>
 
