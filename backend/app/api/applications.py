@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from app.auth.deps import require_employee
 from app.applications.models import ApplicationCreateRequest, ApplicationResponse
 from app.applications.repository import ApplicationRepository
 from app.applications.service import ApplicationService
@@ -27,3 +28,8 @@ def get_application(app_id: int):
     if not row:
         raise HTTPException(status_code=404, detail="Заявка не найдена")
     return row
+
+
+@router.get("", response_model=list[ApplicationResponse], dependencies=[Depends(require_employee)])
+def list_applications(limit: int = 20, offset: int = 0):
+    return service.list_applications(limit=limit, offset=offset)

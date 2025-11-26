@@ -16,3 +16,6 @@ class ClientService:
 
     def get_client(self, client_id: int) -> dict | None:
         return self.repo.get_by_id(client_id)
+
+    def list_clients(self, limit: int, offset: int) -> list[dict]:
+        return self.repo.list(limit=limit, offset=offset)

@@ -16,7 +16,6 @@ class ClientRepository:
                 %(workplace)s, %(position)s, %(monthly_income)s)
         RETURNING *;
         """
-
         with get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute(sql, data)
@@ -27,3 +26,12 @@ class ClientRepository:
             with conn.cursor() as cur:
                 cur.execute("SELECT * FROM clients WHERE id = %s;", (client_id,))
                 return cur.fetchone()
+
+    def list(self, limit: int, offset: int) -> list[dict]:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM clients ORDER BY id DESC LIMIT %s OFFSET %s;",
+                    (limit, offset),
+                )
+                return cur.fetchall()

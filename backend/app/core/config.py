@@ -12,6 +12,13 @@ class Settings:
     db_user: str = os.getenv("DB_USER", "sok_user")
     db_password: str = os.getenv("DB_PASSWORD", "sok_pass")
 
+    jwt_secret_key: str = os.getenv("JWT_SECRET_KEY", "dev_secret_change_me")
+    jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
+    jwt_expires_minutes: int = int(os.getenv("JWT_EXPIRES_MINUTES", "60"))
+
+    admin_username: str = os.getenv("ADMIN_USERNAME", "admin")
+    admin_password: str = os.getenv("ADMIN_PASSWORD", "admin123")
+
     cors_origins_raw: str = os.getenv("CORS_ORIGINS", "http://localhost:5173")
 
     @property

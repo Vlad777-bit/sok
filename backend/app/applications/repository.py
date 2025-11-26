@@ -24,3 +24,12 @@ class ApplicationRepository:
             with conn.cursor() as cur:
                 cur.execute("SELECT * FROM credit_applications WHERE id = %s;", (app_id,))
                 return cur.fetchone()
+
+    def list(self, limit: int, offset: int) -> list[dict]:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM credit_applications ORDER BY id DESC LIMIT %s OFFSET %s;",
+                    (limit, offset),
+                )
+                return cur.fetchall()

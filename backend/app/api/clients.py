@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from app.auth.deps import require_employee
 from app.clients.models import ClientCreateRequest, ClientResponse
 from app.clients.repository import ClientRepository
 from app.clients.service import ClientService
@@ -24,3 +25,9 @@ def get_client(client_id: int):
     if not row:
         raise HTTPException(status_code=404, detail="Клиент не найден")
     return row
+
+
+@router.get("", response_model=list[ClientResponse], dependencies=[Depends(require_employee)])
+def list_clients(limit: int = 20, offset: int = 0):
+    # Список — только для сотрудника
+    return service.list_clients(limit=limit, offset=offset)
