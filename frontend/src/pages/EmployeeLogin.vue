@@ -8,7 +8,7 @@
       <label>Пароль <input v-model="password" type="password" autocomplete="current-password" required /></label>
 
       <button type="submit">Войти</button>
-      <button type="button" class="btn-secondary" @click="onLogout">Выйти</button>
+      <button type="button" class="btn-secondary" @click="onLogout" v-if="me">Выйти</button>
     </form>
 
     <p v-if="error" class="error">{{ error }}</p>

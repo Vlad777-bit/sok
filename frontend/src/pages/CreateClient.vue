@@ -15,6 +15,7 @@
 					<input
 						v-model="form.passport_series"
 						placeholder="1234"
+						maxlength="4"
 						required
 				/></label>
 				<label
@@ -22,6 +23,7 @@
 					<input
 						v-model="form.passport_number"
 						placeholder="567890"
+						maxlength="6"
 						required
 				/></label>
 			</div>
@@ -32,7 +34,14 @@
 			/></label>
 
 			<div class="row">
-				<label>Телефон <input v-model="form.phone" required /></label>
+				<label
+					>Телефон
+					<input
+						v-model="form.phone"
+						maxlength="11"
+						placeholder="89991116633"
+						required
+				/></label>
 				<label
 					>Email <input v-model="form.email" type="email" required
 				/></label>
