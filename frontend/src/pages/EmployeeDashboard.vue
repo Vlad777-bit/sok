@@ -43,13 +43,30 @@
 					</div>
 					<div class="status">{{ a.status }}</div>
 				</div>
+
 				<div class="muted">{{ a.purpose }}</div>
 				<div class="muted">
 					Сумма: {{ a.requested_amount }} | срок:
 					{{ a.term_months }} мес.
 				</div>
+
 				<div class="muted" v-if="a.comment">
 					Комментарий: {{ a.comment }}
+				</div>
+
+				<div class="actions">
+					<button
+						class="btn-mini"
+						@click="setStatus(a.id, 'APPROVED')"
+					>
+						Одобрить
+					</button>
+					<button
+						class="btn-mini btn-danger"
+						@click="setStatus(a.id, 'REJECTED')"
+					>
+						Отклонить
+					</button>
 				</div>
 			</div>
 		</section>
@@ -70,7 +87,6 @@
 			</div>
 		</section>
 
-		<!-- AUDIT -->
 		<section v-if="showAudit" class="block">
 			<h3>Аудит (последние 50)</h3>
 			<div v-if="auditRows.length === 0" class="muted">Пусто</div>
@@ -83,13 +99,13 @@
 					</div>
 					<div class="muted">{{ formatDate(r.created_at) }}</div>
 				</div>
+
 				<div class="muted">
 					actor: {{ r.actor_username ?? 'public' }} ({{
 						r.actor_role ?? '-'
 					}})
 				</div>
 
-				<!-- meta может быть объектом или строкой — покажем аккуратно -->
 				<div class="muted" v-if="r.meta">
 					meta:
 					<pre class="meta">{{ prettyMeta(r.meta) }}</pre>
@@ -118,7 +134,6 @@ const auditRows = ref([]);
 const showAudit = ref(false);
 
 function formatDate(value) {
-	// value приходит как ISO строка – оставим простую “студенческую” обработку
 	try {
 		return new Date(value).toLocaleString();
 	} catch {
@@ -128,9 +143,7 @@ function formatDate(value) {
 
 function prettyMeta(meta) {
 	try {
-		// если meta уже объект - красиво форматируем
 		if (typeof meta === 'object') return JSON.stringify(meta, null, 2);
-		// если строка - попробуем распарсить
 		const maybeObj = JSON.parse(String(meta));
 		return JSON.stringify(maybeObj, null, 2);
 	} catch {
@@ -151,12 +164,23 @@ async function loadAll() {
 
 async function loadAudit() {
 	error.value = '';
-	showAudit.value = true; // важно: чтобы блок появился даже если auditRows пустой
+	showAudit.value = true;
 	try {
 		auditRows.value = await api.listAudit(50);
 	} catch (e) {
-		error.value = e.message || 'Ошибка аудита';
 		auditRows.value = [];
+		error.value = e.message || 'Ошибка аудита';
+	}
+}
+
+async function setStatus(appId, status) {
+	error.value = '';
+	try {
+		await api.updateApplication(appId, { status });
+		await loadAll();
+		if (showAudit.value) auditRows.value = await api.listAudit(50);
+	} catch (e) {
+		error.value = e.message || 'Ошибка обновления статуса';
 	}
 }
 
@@ -180,25 +204,30 @@ onMounted(loadAll);
 	align-items: end;
 	flex-wrap: wrap;
 }
+
 .small {
 	font-size: 14px;
 	display: grid;
 	gap: 6px;
 }
+
 select {
 	padding: 10px 12px;
 	border-radius: 12px;
 	border: 1px solid #dfe6fb;
 	background: #fff;
 }
+
 .btn-secondary {
 	background: #ffffff;
 	color: #1f2a44;
 	border: 1px solid #dfe6fb;
 }
+
 .block {
 	margin-top: 18px;
 }
+
 .item {
 	border: 1px solid #e8ecf5;
 	border-radius: 14px;
@@ -206,14 +235,37 @@ select {
 	margin-top: 10px;
 	background: #fff;
 }
+
 .row2 {
 	display: flex;
 	justify-content: space-between;
 	gap: 10px;
 }
+
 .status {
 	font-weight: 700;
 }
+
+.actions {
+	margin-top: 10px;
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.btn-mini {
+	padding: 8px 10px;
+	border-radius: 10px;
+	border: 0;
+	cursor: pointer;
+	background: #1f2a44;
+	color: #fff;
+}
+
+.btn-danger {
+	background: #b42318;
+}
+
 .meta {
 	margin: 8px 0 0;
 	background: #0b1220;

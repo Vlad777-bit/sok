@@ -5,7 +5,6 @@ const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 async function request(path, options = {}) {
 	const headers = { ...(options.headers || {}) };
 
-	// JSON по умолчанию, но для /auth/token будет form-urlencoded
 	if (
 		!headers['Content-Type'] &&
 		options.body &&
@@ -15,9 +14,7 @@ async function request(path, options = {}) {
 	}
 
 	const token = auth.getToken();
-	if (token) {
-		headers['Authorization'] = `Bearer ${token}`; // стандартный Authorization header :contentReference[oaicite:4]{index=4}
-	}
+	if (token) headers['Authorization'] = `Bearer ${token}`;
 
 	const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
@@ -29,15 +26,14 @@ async function request(path, options = {}) {
 			const lines = data.errors.map((e) => `${e.field}: ${e.message}`);
 			throw new Error(lines.join('; '));
 		}
-		const msg = data?.detail || `HTTP ${res.status}`;
-		throw new Error(msg);
+		throw new Error(data?.detail || `HTTP ${res.status}`);
 	}
 
 	return data;
 }
 
 export const api = {
-	// публичные
+	// public
 	createClient(payload) {
 		return request('/clients', {
 			method: 'POST',
@@ -59,9 +55,7 @@ export const api = {
 
 	// auth
 	async login(username, password) {
-		// OAuth2 password flow требует form-data "username" + "password" :contentReference[oaicite:5]{index=5}
 		const body = new URLSearchParams({ username, password }).toString();
-
 		const res = await fetch(`${BASE}/auth/token`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -79,12 +73,13 @@ export const api = {
 		return request('/auth/me', { method: 'GET' });
 	},
 
-	// защищённые списки (сотрудник)
+	// employee lists
 	listClients(limit = 20, offset = 0) {
 		return request(`/clients?limit=${limit}&offset=${offset}`, {
 			method: 'GET',
 		});
 	},
+
 	listApplications(limit = 20, offset = 0, status = '') {
 		const qs = new URLSearchParams({
 			limit: String(limit),
@@ -92,6 +87,13 @@ export const api = {
 		});
 		if (status) qs.set('status', status);
 		return request(`/applications?${qs.toString()}`, { method: 'GET' });
+	},
+
+	updateApplication(appId, payload) {
+		return request(`/applications/${appId}`, {
+			method: 'PATCH',
+			body: JSON.stringify(payload),
+		});
 	},
 
 	listAudit(limit = 50) {

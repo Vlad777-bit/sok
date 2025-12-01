@@ -8,11 +8,7 @@ class ApplicationService:
         self.client_service = client_service
 
     def _make_decision(self, monthly_income: float, requested_amount: float, term_months: int) -> tuple[str, float | None, str]:
-        """
-        Упрощённый скоринг:
-        - считаем примерный ежемесячный платёж = (сумма / срок) * 1.2 (условно "проценты")
-        - одобряем, если платёж <= 40% дохода
-        """
+        # упрощённый скоринг для MVP
         estimated_payment = (requested_amount / term_months) * 1.2
         limit = monthly_income * 0.4
 
@@ -44,3 +40,23 @@ class ApplicationService:
 
     def list_applications(self, limit: int, offset: int, status: str | None) -> list[dict]:
         return self.repo.list(limit=limit, offset=offset, status=status)
+
+    def update_application(self, app_id: int, patch: dict) -> tuple[dict, dict]:
+        """
+        Возвращаем (old_row, new_row) — удобно для audit: old -> new.
+        """
+        old_row = self.repo.get_by_id(app_id)
+        if not old_row:
+            raise ValueError("Заявка не найдена")
+
+        if not any(k in patch for k in ("status", "interest_rate", "comment")):
+            raise ValueError("Нечего обновлять")
+
+        if patch.get("status") == "REJECTED":
+            patch["interest_rate"] = None
+
+        new_row = self.repo.update(app_id, patch)
+        if not new_row:
+            raise ValueError("Нечего обновлять")
+
+        return old_row, new_row
